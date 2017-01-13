@@ -13,10 +13,11 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "bertvv/centos72"
+  config.vm.box = "bertvv/centos72"
   config.vm.provider "virtualbox" do |vb|
 	vb.gui = true
 	vb.customize ['modifyvm', :id, '--cableconnected1', 'on'] 
-	end
+  end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -47,17 +48,17 @@ Vagrant.configure("2") do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider "virtualbox" do |vb|
+  #config.vm.provider "virtualbox" do |vb|
   #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
+  #  vb.gui = true
   #
   #   # Customize the amount of memory on the VM:
   #   vb.memory = "1024"
-  # end
+  #end
   #
   # View the documentation for the provider you are using for more
   # information on available options.
-
+    
   # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
   # such as FTP and Heroku are also available. See the documentation at
   # https://docs.vagrantup.com/v2/push/atlas.html for more information.
@@ -72,11 +73,24 @@ Vagrant.configure("2") do |config|
   #config.vm.provision "yum", type: "shell"
   #inline: "sudo yum install git -y"
   #end
-  
-  config.vm.provision "yum", type: "shell",
-  inline: "sudo yum install mc -y sudo yum install git -y"
-      
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
+  config.vm.define "duserver01" do |duserver01|
+  duserver01.vm.hostname = "duserver01"
+  duserver01.vm.network "private_network", ip: "172.20.20.10"
+  #duserver01.vm.provision "yum", type: "shell",
+  #inline: "sudo yum install mc -y sudo yum install git -y"
+  duserver01.vm.provision "git clone", type: "shell",
+  inline: "git clone https://github.com/dmitrij-ukrainets/du_devops_training.git"
+  duserver01.vm.provision "git checkout", type: "shell",
+  inline: "cd /home/vagrant/du_devops_training/&&git checkout -b task1 origin/task1"
+  duserver01.vm.provision "git branch check", type: "shell",
+  inline: "cd /home/vagrant/du_devops_training/&&git branch"
+  end
+
+  config.vm.define "duserver02" do |duserver02|
+  duserver02.vm.hostname = "duserver02"
+  duserver02.vm.network "private_network", ip: "172.20.20.11"
+  end
 end
