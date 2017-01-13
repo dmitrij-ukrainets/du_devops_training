@@ -79,8 +79,8 @@ Vagrant.configure("2") do |config|
   config.vm.define "duserver01" do |duserver01|
   duserver01.vm.hostname = "duserver01"
   duserver01.vm.network "private_network", ip: "172.20.20.10"
-  #duserver01.vm.provision "yum", type: "shell",
-  #inline: "sudo yum install mc -y sudo yum install git -y"
+  duserver01.vm.provision "yum", type: "shell",
+  inline: "sudo yum install mc -y sudo yum install git -y"
   duserver01.vm.provision "git clone", type: "shell",
   inline: "git clone https://github.com/dmitrij-ukrainets/du_devops_training.git"
   duserver01.vm.provision "git checkout", type: "shell",
