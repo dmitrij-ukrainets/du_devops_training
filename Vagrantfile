@@ -76,9 +76,10 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
+  
   config.vm.define "duserver01" do |duserver01|
   duserver01.vm.hostname = "duserver01"
-  duserver01.vm.network "private_network", ip: "172.20.20.10"
+  duserver01.vm.network "private_network", type: "dhcp"
   duserver01.vm.provision "yum", type: "shell",
   inline: "sudo yum install mc -y sudo yum install git -y"
   duserver01.vm.provision "git clone", type: "shell",
@@ -87,10 +88,14 @@ Vagrant.configure("2") do |config|
   inline: "cd /home/vagrant/du_devops_training/&&git checkout -b task1 origin/task1"
   duserver01.vm.provision "git branch check", type: "shell",
   inline: "cd /home/vagrant/du_devops_training/&&git branch"
+  duserver01.vm.provision "get ip", type: "shell",
+  inline: "ip addr > /vagrant/duserver01-ip.txt"
   end
 
   config.vm.define "duserver02" do |duserver02|
   duserver02.vm.hostname = "duserver02"
-  duserver02.vm.network "private_network", ip: "172.20.20.11"
+  duserver02.vm.network "private_network", type: "dhcp"
+  duserver02.vm.provision "get ip", type: "shell",
+  inline: "ip addr > /vagrant/duserver02-ip.txt"
   end
 end
