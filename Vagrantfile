@@ -13,7 +13,6 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "bertvv/centos72"
-  config.vm.box = "bertvv/centos72"
   config.vm.provider "virtualbox" do |vb|
 	vb.gui = true
 	vb.customize ['modifyvm', :id, '--cableconnected1', 'on'] 
@@ -78,24 +77,30 @@ Vagrant.configure("2") do |config|
   # SHELL
   
   config.vm.define "duserver01" do |duserver01|
-  duserver01.vm.hostname = "duserver01"
-  duserver01.vm.network "private_network", type: "dhcp"
-  duserver01.vm.provision "yum", type: "shell",
-  inline: "sudo yum install mc -y sudo yum install git -y"
-  duserver01.vm.provision "git clone", type: "shell",
-  inline: "git clone https://github.com/dmitrij-ukrainets/du_devops_training.git"
-  duserver01.vm.provision "git checkout", type: "shell",
-  inline: "cd /home/vagrant/du_devops_training/&&git checkout -b task1 origin/task1"
-  duserver01.vm.provision "git branch check", type: "shell",
-  inline: "cd /home/vagrant/du_devops_training/&&git branch"
-  duserver01.vm.provision "get ip", type: "shell",
-  inline: "ip addr > /vagrant/duserver01-ip.txt"
+	duserver01.vm.hostname = "duserver01"
+	duserver01.vm.network "private_network", type: "dhcp"
+	
+		duserver01.vm.provision "yum", type: "shell",
+		inline: "sudo yum install mc git -y"
+
+		duserver01.vm.provision "git clone", type: "shell",
+		inline: "git clone https://github.com/dmitrij-ukrainets/du_devops_training.git"
+
+		duserver01.vm.provision "git checkout", type: "shell",
+		inline: "cd du_devops_training&&git checkout task1"
+ 
+		duserver01.vm.provision "git branch check", type: "shell",
+		inline: "cd du_devops_training&&git branch"
+  
+		duserver01.vm.provision "get ip", type: "shell",
+		inline: "ip addr > /vagrant/duserver01-ip.txt"
   end
 
   config.vm.define "duserver02" do |duserver02|
-  duserver02.vm.hostname = "duserver02"
-  duserver02.vm.network "private_network", type: "dhcp"
-  duserver02.vm.provision "get ip", type: "shell",
-  inline: "ip addr > /vagrant/duserver02-ip.txt"
+	duserver02.vm.hostname = "duserver02"
+	duserver02.vm.network "private_network", type: "dhcp"
+  
+		duserver02.vm.provision "get ip", type: "shell",
+		inline: "ip addr > /vagrant/duserver02-ip.txt"
   end
 end
