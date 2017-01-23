@@ -41,6 +41,10 @@ SCRIPT
 	$enable_tomcat = <<SCRIPT
 	sudo systemctl enable tomcat
 SCRIPT
+
+	$create_tomcat_folder = <<SCRIPT
+	sudo mkdir /var/lib/tomcat/webapps/task2
+SCRIPT
 	
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -122,21 +126,9 @@ SCRIPT
 		
 		apache.vm.provision "disable_firewall", type: "shell",
 		inline: $disable_firewall
-	
-		#apache.vm.provision "yum", type: "shell",
-		#inline: "sudo yum install git -y"
-
-		#apache.vm.provision "git clone", type: "shell",
-		#inline: "git clone https://github.com/dmitrij-ukrainets/du_devops_training.git"
-
-		#apache.vm.provision "git checkout", type: "shell",
-		#inline: "cd du_devops_training&&git checkout task1"
- 
-		#apache.vm.provision "git branch check", type: "shell",
-		#inline: "cd du_devops_training&&git branch"
   
-		apache.vm.provision "get ip", type: "shell",
-		inline: "ip addr > /vagrant/apache-ip.txt"
+		#apache.vm.provision "get ip", type: "shell",
+		#inline: "ip addr > /vagrant/apache-ip.txt"
   end
 
   config.vm.define "tomcat01" do |tomcat01|
@@ -161,9 +153,15 @@ SCRIPT
 		
 		tomcat01.vm.provision "disable_firewall", type: "shell",
 		inline: $disable_firewall
+		
+		tomcat01.vm.provision "create tomcat folder", type: "shell",
+		inline: $create_tomcat_folder
+		
+		tomcat01.vm.provision "fill index.html", type: "shell",
+		inline: "sudo echo Welcome to Tomcat on server tomcat01 > /var/lib/tomcat/webapps/task2/index.html"
   
-		tomcat01.vm.provision "get ip", type: "shell",
-		inline: "ip addr > /vagrant/tomcat01-ip.txt"
+		#tomcat01.vm.provision "get ip", type: "shell",
+		#inline: "ip addr > /vagrant/tomcat01-ip.txt"
   end
     config.vm.define "tomcat02" do |tomcat02|
 	tomcat02.vm.hostname = "tomcat02"
@@ -186,9 +184,15 @@ SCRIPT
 		inline: $stop_firewall
 		
 		tomcat02.vm.provision "disable_firewall", type: "shell",
-		inline: $disable_firewall	
-  
-		tomcat02.vm.provision "get ip", type: "shell",
-		inline: "ip addr > /vagrant/tomcat02-ip.txt"
+		inline: $disable_firewall
+		
+		tomcat02.vm.provision "create tomcat folder", type: "shell",
+		inline: $create_tomcat_folder
+		
+		tomcat02.vm.provision "fill index.html", type: "shell",
+		inline: "sudo echo Welcome to Tomcat on server tomcat02 > /var/lib/tomcat/webapps/task2/index.html"
+		  
+		#tomcat02.vm.provision "get ip", type: "shell",
+		#inline: "ip addr > /vagrant/tomcat02-ip.txt"
   end
 end
