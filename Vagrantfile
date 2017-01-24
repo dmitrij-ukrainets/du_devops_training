@@ -45,6 +45,34 @@ SCRIPT
 	$create_tomcat_folder = <<SCRIPT
 	sudo mkdir /var/lib/tomcat/webapps/task2
 SCRIPT
+
+	$restart_httpd = <<SCRIPT
+	sudo systemctl restart httpd
+SCRIPT
+
+	$configure_mod_jk = <<SCRIPT
+	sudo echo "worker.list=lb
+				worker.lb.type=lb
+				worker.lb.balance_workers=tomcat01, tomcat02
+				worker.tomcat01.host=192.168.0.11
+				worker.tomcat01.port=8009
+				worker.tomcat01.type=ajp13
+				worker.tomcat02.host=192.168.0.12
+				worker.tomcat02.port=8009
+				worker.tomcat02.type=ajp13
+				worker.list=status
+				worker.status.type=status" > /etc/httpd/conf/workers.properties
+SCRIPT
+
+	$configure_httpd_lb = <<SCRIPT
+	sudo echo "LoadModule jk_module modules/mod_jk.so
+				JkWorkersFile conf/workers.properties
+				JkShmFile /tmp/shm
+				JkLogFile logs/mod_jk.log
+				JkLogLevel info
+				JkMount /task2* lb
+				JkMount /jk-status status" >> /etc/httpd/conf/httpd.conf
+SCRIPT
 	
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -126,6 +154,18 @@ SCRIPT
 		
 		apache.vm.provision "disable_firewall", type: "shell",
 		inline: $disable_firewall
+		
+		apache.vm.provision "add mod_jk connector", type: "shell",
+		inline: "sudo cp /vagrant/mod_jk.so /etc/httpd/modules/"
+		
+		apache.vm.provision "configure_mod_jk", type: "shell",
+		inline: $configure_mod_jk
+		
+		apache.vm.provision "configure_httpd_lb", type: "shell",
+		inline: $configure_httpd_lb
+		
+		apache.vm.provision "restart_httpd", type: "shell",
+		inline: $restart_httpd
   
 		#apache.vm.provision "get ip", type: "shell",
 		#inline: "ip addr > /vagrant/apache-ip.txt"
