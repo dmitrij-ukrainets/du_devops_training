@@ -18,60 +18,54 @@ Vagrant.configure("2") do |config|
 	vb.customize ['modifyvm', :id, '--cableconnected1', 'on'] 
 	end
 	
-	$stop_firewall = <<SCRIPT
-	sudo systemctl stop firewalld
+$stop_firewall = <<SCRIPT
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
 SCRIPT
 
-	$disable_firewall = <<SCRIPT
-	sudo systemctl disable firewalld
+$install_httpd = <<SCRIPT
+sudo yum install httpd -y
+sudo systemctl enable httpd
+sudo systemctl start httpd
 SCRIPT
 
-	$install_java = <<SCRIPT
-	sudo yum install java-1.8.0-openjdk -y
+$install_java = <<SCRIPT
+sudo yum install java-1.8.0-openjdk -y
 SCRIPT
 
-	$install_tomcat = <<SCRIPT
-	sudo yum install tomcat tomcat-webapps tomcat-admin-webapps -y
+$install_tomcat = <<SCRIPT
+sudo yum install tomcat tomcat-webapps tomcat-admin-webapps -y
+sudo systemctl start tomcat
+sudo systemctl enable tomcat
+sudo mkdir /var/lib/tomcat/webapps/task2
 SCRIPT
 
-	$start_tomcat = <<SCRIPT
-	sudo systemctl start tomcat
+$restart_httpd = <<SCRIPT
+sudo systemctl restart httpd
 SCRIPT
 
-	$enable_tomcat = <<SCRIPT
-	sudo systemctl enable tomcat
+$configure_mod_jk = <<SCRIPT
+sudo echo "worker.list=lb
+worker.lb.type=lb
+worker.lb.balance_workers=tomcat01, tomcat02
+worker.tomcat01.host=192.168.0.11
+worker.tomcat01.port=8009
+worker.tomcat01.type=ajp13
+worker.tomcat02.host=192.168.0.12
+worker.tomcat02.port=8009
+worker.tomcat02.type=ajp13
+worker.list=status
+worker.status.type=status" > /etc/httpd/conf/workers.properties
 SCRIPT
 
-	$create_tomcat_folder = <<SCRIPT
-	sudo mkdir /var/lib/tomcat/webapps/task2
-SCRIPT
-
-	$restart_httpd = <<SCRIPT
-	sudo systemctl restart httpd
-SCRIPT
-
-	$configure_mod_jk = <<SCRIPT
-	sudo echo "worker.list=lb
-				worker.lb.type=lb
-				worker.lb.balance_workers=tomcat01, tomcat02
-				worker.tomcat01.host=192.168.0.11
-				worker.tomcat01.port=8009
-				worker.tomcat01.type=ajp13
-				worker.tomcat02.host=192.168.0.12
-				worker.tomcat02.port=8009
-				worker.tomcat02.type=ajp13
-				worker.list=status
-				worker.status.type=status" > /etc/httpd/conf/workers.properties
-SCRIPT
-
-	$configure_httpd_lb = <<SCRIPT
-	sudo echo "LoadModule jk_module modules/mod_jk.so
-				JkWorkersFile conf/workers.properties
-				JkShmFile /tmp/shm
-				JkLogFile logs/mod_jk.log
-				JkLogLevel info
-				JkMount /task2* lb
-				JkMount /jk-status status" >> /etc/httpd/conf/httpd.conf
+$configure_httpd_lb = <<SCRIPT
+sudo echo "LoadModule jk_module modules/mod_jk.so
+JkWorkersFile conf/workers.properties
+JkShmFile /tmp/shm
+JkLogFile logs/mod_jk.log
+JkLogLevel info
+JkMount /task2* lb
+JkMount /jk-status status" >> /etc/httpd/conf/httpd.conf
 SCRIPT
 	
   # Disable automatic box update checking. If you disable this, then
@@ -132,8 +126,11 @@ SCRIPT
   #   apt-get install -y apache2
   # SHELL
   
-  config.vm.provision "shell",
+	config.vm.provision "shell",
 	inline: "sudo yum install mc -y"
+	
+	config.vm.provision "stop_firewall", type: "shell",
+	inline: $stop_firewall
   
   config.vm.define "apache" do |apache|
 	apache.vm.hostname = "apache"
@@ -141,19 +138,7 @@ SCRIPT
 	apache.vm.network "forwarded_port", guest: 80, host: 21080
 	
 		apache.vm.provision "install httpd", type: "shell",
-		inline: "sudo yum install httpd -y"
-		
-		apache.vm.provision "start service httpd", type: "shell",
-		inline: "sudo systemctl enable httpd"
-		
-		apache.vm.provision "start httpd", type: "shell",
-		inline: "sudo systemctl start httpd"
-		
-		apache.vm.provision "stop_firewall", type: "shell",
-		inline: $stop_firewall
-		
-		apache.vm.provision "disable_firewall", type: "shell",
-		inline: $disable_firewall
+		inline: $install_httpd
 		
 		apache.vm.provision "add mod_jk connector", type: "shell",
 		inline: "sudo cp /vagrant/mod_jk.so /etc/httpd/modules/"
@@ -182,21 +167,6 @@ SCRIPT
 		tomcat01.vm.provision "install tomcat", type: "shell",
 		inline: $install_tomcat
 		
-		tomcat01.vm.provision "start tomcat", type: "shell",
-		inline: $start_tomcat
-		
-		tomcat01.vm.provision "enable tomcat", type: "shell",
-		inline: $enable_tomcat
-	
-		tomcat01.vm.provision "stop_firewall", type: "shell",
-		inline: $stop_firewall
-		
-		tomcat01.vm.provision "disable_firewall", type: "shell",
-		inline: $disable_firewall
-		
-		tomcat01.vm.provision "create tomcat folder", type: "shell",
-		inline: $create_tomcat_folder
-		
 		tomcat01.vm.provision "fill index.html", type: "shell",
 		inline: "sudo echo Welcome to Tomcat on server tomcat01 > /var/lib/tomcat/webapps/task2/index.html"
   
@@ -213,21 +183,6 @@ SCRIPT
 		
 		tomcat02.vm.provision "install tomcat", type: "shell",
 		inline: $install_tomcat
-		
-		tomcat02.vm.provision "start tomcat", type: "shell",
-		inline: $start_tomcat
-		
-		tomcat02.vm.provision "enable tomcat", type: "shell",
-		inline: $enable_tomcat
-	
-		tomcat02.vm.provision "stop_firewall", type: "shell",
-		inline: $stop_firewall
-		
-		tomcat02.vm.provision "disable_firewall", type: "shell",
-		inline: $disable_firewall
-		
-		tomcat02.vm.provision "create tomcat folder", type: "shell",
-		inline: $create_tomcat_folder
 		
 		tomcat02.vm.provision "fill index.html", type: "shell",
 		inline: "sudo echo Welcome to Tomcat on server tomcat02 > /var/lib/tomcat/webapps/task2/index.html"
