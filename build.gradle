@@ -39,7 +39,7 @@ task setBuildVersion {
 task aWriteToFile {
 	doLast{
 		def greetingsFile = file("./build/resources/main/greeting.txt")
-		greetingsFile.append('version='+version)
+		greetingsFile.append('\n'+'version='+version)
 	}
 }
 
