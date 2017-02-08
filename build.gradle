@@ -14,13 +14,7 @@ war {
 	archiveName 'task3.war'
 }
 
-
 import java.util.regex.Pattern
-
-def getDate() {
-	new Date().format('yyyy-MM-dd HH:mm:ss')
-}
-
 
 task setBuildVersion {
 		doLast{
@@ -45,7 +39,7 @@ task setBuildVersion {
 task aWriteToFile {
 	doLast{
 		def greetingsFile = file("./build/resources/main/greeting.txt")
-		greetingsFile.append('\n'+getDate()+'\t'+'version='+version)
+		greetingsFile.append('version='+version)
 	}
 }
 
