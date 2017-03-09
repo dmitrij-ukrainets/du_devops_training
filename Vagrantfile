@@ -102,7 +102,7 @@ which ruby > ~/ruby-test.txt
 SCRIPT
 
 $where_chef = <<SCRIPT
-sudo echo "sudo echo 192.168.0.10 apache > /etc/hosts"
+sudo echo "192.168.0.10 apache >> /etc/hosts"
 SCRIPT
 	
 	config.vm.provision "shell",
