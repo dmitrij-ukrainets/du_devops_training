@@ -11,7 +11,7 @@ dependencies{
 }
 
 war {
-	archiveName 'task3.war'
+	archiveName 'task5.war'
 }
 
 import java.util.regex.Pattern
