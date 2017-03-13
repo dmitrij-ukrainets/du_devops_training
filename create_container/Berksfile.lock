@@ -1,0 +1,9 @@
+DEPENDENCIES
+  create_container
+    path: .
+    metadata: true
+
+GRAPH
+  create_container (0.1.2)
+    docker (~> 2.0)
+  docker (2.15.2)

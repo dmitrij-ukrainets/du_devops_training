@@ -1,0 +1,13 @@
+{
+   "name": "tomcat",
+   "default_attributes": {
+   },
+   "json_class": "Chef::Role",
+   "run_list": ["role[tomcat]",
+                "recipe[create_container::default]"
+   ],
+   "description": "Run task5 container from local registry",
+   "chef_type": "role",
+   "override_attributes": {
+   }
+}

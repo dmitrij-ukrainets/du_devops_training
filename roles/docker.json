@@ -1,0 +1,12 @@
+{
+   "name": "docker",
+   "default_attributes": {
+   },
+   "json_class": "Chef::Role",
+   "run_list": ["recipe[install_docker::default]"
+   ],
+   "description": "Install docker with insecure registry",
+   "chef_type": "role",
+   "override_attributes": {
+   }
+}
