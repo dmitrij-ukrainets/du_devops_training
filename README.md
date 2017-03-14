@@ -1,2 +1,2 @@
 # du_devops_training
-# Task 5
+# Task 7
